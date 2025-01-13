@@ -37,7 +37,7 @@ void FindPath::calculate_path(){
             for (int i = 0; i < indices.size(); i++){
                 for (int j = 0; j < indices[i].size(); j++){
                     if (indices[i][j] < 0){
-                        throw runtime_error("Encountered (-) index to node.");
+                        throw runtime_error("Possibly bad start point.");
                     }
                 }
             }
