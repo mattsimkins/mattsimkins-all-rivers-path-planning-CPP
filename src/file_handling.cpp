@@ -8,6 +8,8 @@
 
 using namespace std;
 
+
+// Reads in trajectory from text file
 vector<vector<float>> read_traj(string file_name) {
     std::ifstream inputFile(file_name);
     vector<vector<float>> traj(0, vector<float>(2, 0.0));
@@ -49,54 +51,154 @@ vector<vector<float>> read_traj(string file_name) {
     return traj;
 }
 
-void save_model(BuildGrid::GridInfo* model){
+// Structure for reading and writting model to a file
+struct Model_R_W {
+    float d;
 
-    ModelFile model2write; // Initialize structure before writing to binary
+    float average_path_length;
+    int grid_update_count;
+    int max_coord_count;
+    float shortest_segment;
 
-    cout << sizeof(model2write) << endl;
+    float shift_1;
+    float shift_2;
 
-    model2write.d = model->d;
-    model2write.average_path_length = model->average_path_length;
-    model2write.grid_update_count = model->grid_update_count;
-    model2write.max_coord_count = model->max_coord_count;
-    model2write.shortest_segment = model->shortest_segment;
-    model2write.shift = model->shift;
-    model2write.grid = model->grid;
+    // Grid of variable dimensions
+    int size_i;
+    int size_j;
+    int size_k;
+    string grid_string; // 3D vector marshaled as string
+    void loadFromFile(ifstream &infile) {
+        infile >> d;
 
-    cout << sizeof(model2write) << endl;
+        infile >> average_path_length;
+        infile >> grid_update_count;
+        infile >> max_coord_count;
+        infile >> shortest_segment;
 
-    cout << "model size is :" << model->grid.size() << endl;
-    cout << "model2write.max_coord_count: " << model->max_coord_count << endl;
-    cout << "model2write.average_path_length: " << model->average_path_length << endl;
-    cout << "model2write.shortest_segment: " << model->shortest_segment << endl;
-    cout << "model2write.grid_update_count: " << model->grid_update_count << endl;
-    cout << "model2write.d: " << model->d << endl;
-    cout << "element in grid, [10][10][0] is " << model->grid[10][10][0] << endl;
-    cout << "model2write.shift: " << model->shift[0] << " " << model->shift[1] << endl;
+        // Two elements of shift vector
+        infile >> shift_1;
+        infile >> shift_2;
 
-    ofstream outfile("model.bin", ios::binary);
+        // Not part of model, but for read/write purposes
+        infile >> size_i;
+        infile >> size_j;
+        infile >> size_k;
 
-    if (!outfile.is_open()) {
+        infile.ignore(1, ' ');
+        getline(infile, grid_string);
+    }
+};
+
+
+
+void save_model(BuildGrid::GridInfo* model_ptr){
+    
+    // Copy to type Model_R_W to martial vectors for read/write 
+    Model_R_W model_w;
+    model_w.d = model_ptr->d;
+    model_w.average_path_length = model_ptr->average_path_length;
+    model_w.grid_update_count = model_ptr->grid_update_count;
+    model_w.max_coord_count = model_ptr->max_coord_count;
+    model_w.shortest_segment = model_ptr->shortest_segment;
+    model_w.shift_1 = model_ptr->shift[0];
+    model_w.shift_2 = model_ptr->shift[1];
+
+    model_w.size_i = model_ptr->grid.size();
+    model_w.size_j = model_ptr->grid[0].size();
+    model_w.size_k = model_ptr->grid[0][0].size();
+    
+    // String indexing for grid
+    string str_val;
+    string marshaled_vec; // String containing indices and angles
+    for (int i = 0; i < model_w.size_i; ++i){
+        for (int j = 0; j < model_w.size_j; ++j) {
+            for (int k = 0; k < model_w.size_k; ++k){
+                marshaled_vec += " "; // Indices separator
+                str_val = to_string(model_ptr->grid[i][j][k]);
+                marshaled_vec += str_val;
+            }
+        }
+
+    }
+    model_w.grid_string = marshaled_vec;
+    
+    ofstream outfile("model.txt");
+
+  if (!outfile.is_open()) {
         cerr << "Error opening file!" << endl;
     }
 
-    outfile.write(reinterpret_cast<char*>(&model2write), sizeof(ModelFile));
+
+
+    outfile << model_w.d << " " 
+            << model_w.average_path_length << " "
+            << model_w.grid_update_count << " "
+            << model_w.max_coord_count << " "
+            << model_w.shortest_segment << " "
+            << model_w.shift_1 << " "
+            << model_w.shift_2 << " "
+            << model_w.size_i << " "
+            << model_w.size_j << " "
+            << model_w.size_k << " "
+            << model_w.grid_string << endl;
+    outfile.close();
+
 }
+
 
 BuildGrid::GridInfo* read_model() {
 
     BuildGrid::GridInfo* model = new BuildGrid::GridInfo; // !!Assess memory usage with this
 
-    ifstream file("model.bin", ios::binary); // Open the binary file
+    Model_R_W model_r; // Uses read/write structure
+    //BuildGrid::GridInfo model_return; // Uses structure for training and estimation
 
-    if (!file.is_open()) {
-        cerr << "Error opening file" << std::endl;
+    std::ifstream infile("model.txt");
+    model_r.loadFromFile(infile);
+
+    // Growing model_return dynamically in nested loops would be more space efficient!!
+    vector<vector<vector<float>>> marsheled_grid(
+                                        model_r.size_i, vector<vector<float>>(
+                                        model_r.size_j, vector<float>(
+                                        model_r.size_k, 0.0)));
+    infile.close();
+
+    // Populate model
+    bool end;
+    int l = 0;
+    float num;
+    string value;
+    for (int i = 0; i < model_r.size_i; ++i){
+        for (int j = 0; j < model_r.size_j; ++j) {
+            for (int k = 0; k < model_r.size_k; ++k){
+                end = false;
+                while (end != true){
+                    ++l;
+                    if (model_r.grid_string[l] != ' ') {
+                        value += model_r.grid_string[l];
+                    } else {
+                        end = true;
+                        num = stof(value);
+                        marsheled_grid[i][j][k] = num;
+                    }
+                }
+                value = "";
+            }
+        }
     }
- 
-    file.read(reinterpret_cast<char*>(model), sizeof(ModelFile)); // Read data into 'data' struct
-    file.close();
 
-    cout << "Read-in model d: " << model->d << endl;
+     
+
+    model->d = model_r.d;
+    model->average_path_length = model_r.average_path_length;
+    model->grid_update_count = model_r.grid_update_count;
+    model->max_coord_count = model_r.max_coord_count;
+    model->shortest_segment = model_r.shortest_segment;
+    model->shift = {model_r.shift_1, model_r.shift_2};
+    model->grid = marsheled_grid; // !!not very memory efficient
+
+
 
     return model;
 }
