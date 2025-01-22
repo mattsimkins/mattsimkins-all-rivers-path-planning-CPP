@@ -22,10 +22,11 @@ int main() {
     cout << "traj 2 done" << endl;
     BuildGrid::GridInfo* model = train.getModel();
 
-    cout << model->shift[0] << " " << model->shift[1] << endl;
+    //cout << model->shift[0] << " " << model->shift[1] << endl;
     save_model(model);
 
-    vector<float> start = {640, -320};
+    vector<float> start = {640, -320}; // For example.txt
+    //vector<float> start = {-10, -10.}; // For 3point.txt
     FindPath estimate(model, start);
 
     vector<vector<float>> calculated_path = estimate.get_path();
