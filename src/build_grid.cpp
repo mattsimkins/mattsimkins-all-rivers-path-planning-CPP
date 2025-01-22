@@ -18,6 +18,7 @@ BuildGrid::BuildGrid(vector<vector<float>>& trajectory, float& node_spacing)
     model.average_path_length = 0; //Average length of training paths
     model.max_coord_count = 0; // Max quantity of cooordinates among trajectories
     model.shortest_segment = model.d; // Min distance between trajectory coordinates
+    model.last_start_pt = trajectory[0]; // Retains a viable start point for model
 
     // Calculating extents are done redundantly in trainGrid for only new, empty grids
     cSpaceExtents = calculateExtents_c();
@@ -36,6 +37,11 @@ BuildGrid::GridInfo* BuildGrid::getModel() {
 // Public function
 void BuildGrid::trainOnTrajectory(vector<vector<float>>& traj){
     trainGrid(traj);
+}
+
+// Public function
+vector<float> BuildGrid::getStartPoint() {
+    return model.last_start_pt;
 }
 
 void BuildGrid::fixDuplicates(){
