@@ -46,12 +46,12 @@ vector<vector<float>> read_traj(string file_name) {
 
         inputFile.close();
     } else {
-        std::cerr << "Error: Unable to open file." << std::endl;
+        cerr << "Error: Unable to open file." << std::endl;
     }
     return traj;
 }
 
-// Structure for reading and writting model to a file
+// For reading and writting model to a file
 struct Model_R_W {
     float d;
 
@@ -59,6 +59,9 @@ struct Model_R_W {
     int grid_update_count;
     int max_coord_count;
     float shortest_segment;
+
+    float start_1;
+    float start_2;
 
     float shift_1;
     float shift_2;
@@ -75,6 +78,10 @@ struct Model_R_W {
         infile >> grid_update_count;
         infile >> max_coord_count;
         infile >> shortest_segment;
+
+        // Two elements of last_start_pt vector
+        infile >> start_1;
+        infile >> start_2;
 
         // Two elements of shift vector
         infile >> shift_1;
@@ -101,6 +108,10 @@ void save_model(BuildGrid::GridInfo* model_ptr){
     model_w.grid_update_count = model_ptr->grid_update_count;
     model_w.max_coord_count = model_ptr->max_coord_count;
     model_w.shortest_segment = model_ptr->shortest_segment;
+    
+    model_w.start_1 = model_ptr->last_start_pt[0];
+    model_w.start_2 = model_ptr->last_start_pt[1];
+
     model_w.shift_1 = model_ptr->shift[0];
     model_w.shift_2 = model_ptr->shift[1];
 
@@ -136,6 +147,8 @@ void save_model(BuildGrid::GridInfo* model_ptr){
             << model_w.grid_update_count << " "
             << model_w.max_coord_count << " "
             << model_w.shortest_segment << " "
+            << model_w.start_1 << " "
+            << model_w.start_2 << " "
             << model_w.shift_1 << " "
             << model_w.shift_2 << " "
             << model_w.size_i << " "
@@ -164,7 +177,7 @@ BuildGrid::GridInfo* read_model() {
                                         model_r.size_k, 0.0)));
     infile.close();
 
-    // Populate model
+    // Populate grid
     bool end;
     int l = 0;
     float num;
@@ -195,6 +208,7 @@ BuildGrid::GridInfo* read_model() {
     model->grid_update_count = model_r.grid_update_count;
     model->max_coord_count = model_r.max_coord_count;
     model->shortest_segment = model_r.shortest_segment;
+    model->last_start_pt = {model_r.start_1, model_r.start_2};
     model->shift = {model_r.shift_1, model_r.shift_2};
     model->grid = marsheled_grid; // !!not very memory efficient
 
