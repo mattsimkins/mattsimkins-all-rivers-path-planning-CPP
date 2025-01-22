@@ -30,11 +30,13 @@ public:
         int grid_update_count; // Number of times grid has been updated
         int max_coord_count; // Max coordinate count in training trajectories
         float shortest_segment;
+        vector<float> last_start_pt;
         vector<float> shift; //Shifts C-Space to S-Space
         vector<vector<vector<float>>> grid; // 3D matrix to store grid values
     };
 
-    GridInfo* getModel(); // Member function to return pointer
+    GridInfo* getModel(); // Member function to return model pointer
+    vector<float> getStartPoint(); // Retains a valid start point
 
     ~BuildGrid();
 
