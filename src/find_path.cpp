@@ -37,7 +37,7 @@ void FindPath::calculate_path(){
             for (int i = 0; i < indices.size(); i++){
                 for (int j = 0; j < indices[i].size(); j++){
                     if (indices[i][j] < 0){
-                        throw runtime_error("Possibly bad start point.");
+                        cerr << "Possibly bad start point." << endl;
                     }
                 }
             }
@@ -79,7 +79,9 @@ void FindPath::calculate_path(){
             // Case 1 - All nodes are empty so abort, model fails
             if (num_nodes_visited == 0) {
                 stop_calc = true;
-                cout << "Model failed to find a path" << endl;
+                cerr << "Model failed to find a path from the given start"
+                << " point." << endl;
+            
 
             // Case 2 - Two of three nodes are empty, but recoverable
             } else if (num_nodes_visited == 1){
