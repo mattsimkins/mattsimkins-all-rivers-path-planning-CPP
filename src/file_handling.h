@@ -7,23 +7,59 @@
 
 using namespace std;
 
-// Reads in a .txt file with a separated lisit of x and y trajectory points
+// Read in a .txt file
 vector<vector<float>> read_traj(string file_name);
 
-// Saves model returned by BuildGrid
-void save_model(BuildGrid::GridInfo* trained_model);
+// Save model, vectors must be marshaled to strings
+void save_model(BuildGrid::GridInfo* trained_model, string& file_name);
 
-// Captures essential training model information
-struct ModelFile {
-    float d; // Node spacing
-    float average_path_length; // Average length of training paths
-    int grid_update_count; // Number of times grid has been updated
-    int max_coord_count; // Max coordinate count in training trajectories
+// Read model, strings must be marshaled to vectors
+BuildGrid::GridInfo* read_model(string& file_name);
+
+// For reading and writting model to a file
+struct Model_R_W {
+    float d;
+    float average_path_length;
+    int grid_update_count;
+    int max_coord_count;
     float shortest_segment;
-    vector<float> shift; //Shifts C-Space to S-Space
-    vector<vector<vector<float>>> grid; // 3D matrix to store grid values
-};
 
-BuildGrid::GridInfo* read_model();
+    // Start and shift vectors are stored as floats
+    float start_1;
+    float start_2;
+    float shift_1;
+    float shift_2;
+
+    // Vector grid size varies, save dimensions for reading
+    int size_i;
+    int size_j;
+    int size_k;
+    string grid_string; // 3D vector marshaled as string
+    
+    // Retain locations in struct
+    void loadFromFile(ifstream &infile) {
+        infile >> d;
+        infile >> average_path_length;
+        infile >> grid_update_count;
+        infile >> max_coord_count;
+        infile >> shortest_segment;
+
+        // Two elements of last_start_pt vector
+        infile >> start_1;
+        infile >> start_2;
+
+        // Two elements of shift vector
+        infile >> shift_1;
+        infile >> shift_2;
+
+        // Not part of model, but for read/write purposes
+        infile >> size_i;
+        infile >> size_j;
+        infile >> size_k;
+
+        infile.ignore(1, ' ');
+        getline(infile, grid_string);
+    }
+};
 
 #endif
