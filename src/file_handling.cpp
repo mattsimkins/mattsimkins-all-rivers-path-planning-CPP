@@ -93,7 +93,7 @@ void save_model(BuildGrid::GridInfo* model_ptr, string& file_name){
     outfile.close();
 }
 
-BuildGrid::GridInfo* read_model(string file_name) {
+BuildGrid::GridInfo* read_model(string& file_name) {
 
     BuildGrid::GridInfo* model = new BuildGrid::GridInfo;
 
