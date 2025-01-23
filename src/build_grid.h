@@ -29,9 +29,9 @@ public:
         float average_path_length; // Average length of training paths
         int grid_update_count; // Number of times grid has been updated
         int max_coord_count; // Max coordinate count in training trajectories
-        float shortest_segment;
-        vector<float> last_start_pt;
-        vector<float> shift; //Shifts C-Space to S-Space
+        float shortest_segment; // Min distance between trajectory coordinates
+        vector<float> last_start_pt; // Retains a viable start point for model
+        vector<float> shift; // Shifts C-Space to S-Space
         vector<vector<vector<float>>> grid; // 3D matrix to store grid values
     };
 
