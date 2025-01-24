@@ -5,10 +5,11 @@
 
 using namespace std;
 
-
+// Requires a directory named "training" be created in working directory
 // Reads in trajectory from text file
 vector<vector<float>> read_traj(string file_name) {
-    std::ifstream inputFile(file_name);
+    string path = "../training/" + file_name;
+    ifstream inputFile(path);
     vector<vector<float>> traj(0, vector<float>(2, 0.0));
     if (inputFile.is_open()) {
         std::string line;
@@ -39,7 +40,27 @@ vector<vector<float>> read_traj(string file_name) {
     return traj;
 }
 
-void save_model(BuildGrid::GridInfo* model_ptr, string& file_name){
+// Requires a directory named "outputs" be created in working directory
+void write_traj(vector<vector<float>>& traj, string file_name){
+    string path = "../outputs/" + file_name;
+    ofstream outfile(path);
+
+    if (!outfile.is_open()) {
+        cerr << "Error opening file!" << endl;\
+    }
+
+    for (const auto &row : traj) {
+        for (const auto &element : row) {
+            outfile << element << " ";
+        }
+        outfile << endl;
+    }
+
+    outfile.close();
+}
+
+// Requires a directory named "outputs" be created in working directory
+void save_model(BuildGrid::GridInfo* model_ptr, string file_name){
     
     // Copy to type Model_R_W and martial vectors for write 
     Model_R_W model_w;
@@ -71,7 +92,8 @@ void save_model(BuildGrid::GridInfo* model_ptr, string& file_name){
     }
     model_w.grid_string = marshaled_vec;
     
-    ofstream outfile(file_name);
+    string path = "../outputs/" + file_name;
+    ofstream outfile(path);
 
   if (!outfile.is_open()) {
         cerr << "Error opening file!" << endl;
@@ -93,13 +115,15 @@ void save_model(BuildGrid::GridInfo* model_ptr, string& file_name){
     outfile.close();
 }
 
-BuildGrid::GridInfo* read_model(string& file_name) {
+// Requires a directory named "outputs" be created in working directory
+BuildGrid::GridInfo* read_model(string file_name) {
 
     BuildGrid::GridInfo* model = new BuildGrid::GridInfo;
 
     Model_R_W model_r; // Structure used for reading
 
-    std::ifstream infile(file_name);
+    string path = "../outputs/" + file_name;
+    std::ifstream infile(path);
     model_r.loadFromFile(infile);
 
     // Vector to populate from string in saved grid
