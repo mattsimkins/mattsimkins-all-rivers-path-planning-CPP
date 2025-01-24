@@ -5,15 +5,36 @@
 
 using namespace std;
 
-// New model
+// Constructor
 FindPath::FindPath(BuildGrid::GridInfo* trained_model, vector<float>& start_point)
     : model(trained_model), start_c(start_point) {
     calculate_path();
 }
+
 FindPath::~FindPath() {}
+
+
+// Public function gets path transformed from S-Space to C-Space
+vector<vector<float>> FindPath::get_path(){
+    vector<vector<float>> traj_c(calc_traj.size(), vector<float>(2));
+    cout << "calc_traj size is: " << calc_traj.size() << endl;
+
+    for (int i = 0; i < calc_traj.size(); i++){
+        traj_c[i][0] = calc_traj[i][0] - model->shift[0];
+        traj_c[i][1] = calc_traj[i][1] - model->shift[1];
+    }
+    return traj_c;
+}
+
+// Public function returns a calculated path given a new start point
+    void FindPath::find_path(vector<float>& start_point) {
+        start_c = start_point;
+        calculate_path();
+    }
 
 // Caluculate path based on trained model
 void FindPath::calculate_path(){
+    calc_traj.clear();
     vector<float> loc; // Location along trajectory
     vector<float> next_loc;
     calc_traj.push_back({start_c[0] + model->shift[0],
@@ -138,25 +159,13 @@ void FindPath::calculate_path(){
                 stop_calc = true;
             }
             
-            // Check that trajectory path is not much longer than average         
+            // Check that trajectory path is not much longer than average     
             if (model->average_path_length < running_length) {
                 stop_calc = true;
             }       
             calc_traj.push_back(next_loc); // Grow trajectory by one coordinate
         } // End while loop
 } 
-
-// Gets path transformed from S-Space to C-Space
-vector<vector<float>> FindPath::get_path(){
-    vector<vector<float>> traj_c(calc_traj.size(), vector<float>(2));
-    cout << "calc_traj size is: " << calc_traj.size() << endl;
-
-    for (int i = 0; i < calc_traj.size(); i++){
-        traj_c[i][0] = calc_traj[i][0] - model->shift[0];
-        traj_c[i][1] = calc_traj[i][1] - model->shift[1];
-    }
-    return traj_c;
-}
 
 // Populates unvisited nodes based on estimated trajectory
 void FindPath::update_empty_node(const vector<float>& vec,
@@ -203,6 +212,7 @@ vector<float> FindPath::two_empty_nodes(
     } else if (visited_nodes[0] == false &&
                visited_nodes[1] == true &&
                visited_nodes[2] == false) {
+                
         vector<float> loc_right_points2 = add_vectors(loc_right,
                                                       triad_vecs[1]);
         vector<float> vec_left = subtract_vectors(loc_right_points2,
