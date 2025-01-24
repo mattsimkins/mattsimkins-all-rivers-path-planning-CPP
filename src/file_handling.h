@@ -7,14 +7,17 @@
 
 using namespace std;
 
-// Read in a .txt file
+// Read in a trajectory from .txt file
 vector<vector<float>> read_traj(string file_name);
 
+// Write a trajectory to a .txt file
+void write_traj(vector<vector<float>>& traj, string file_name); 
+
 // Save model, vectors must be marshaled to strings
-void save_model(BuildGrid::GridInfo* trained_model, string& file_name);
+void save_model(BuildGrid::GridInfo* trained_model, string file_name);
 
 // Read model, strings must be marshaled to vectors
-BuildGrid::GridInfo* read_model(string& file_name);
+BuildGrid::GridInfo* read_model(string file_name);
 
 // For reading and writting model to a file
 struct Model_R_W {
