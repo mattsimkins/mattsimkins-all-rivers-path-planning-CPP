@@ -12,39 +12,73 @@ using namespace std;
 
 int main() {
     
-    vector<vector<float>> traj = read_traj("example.txt");
-    vector<vector<float>> traj1 = read_traj("example1.txt");
+    float grid_spacing = 80; // May involve tuning
+    vector<vector<float>> traj; // For training trajectory argument
+
+    traj = read_traj("Explore entire maze.txt"); // First trajectory to train on
+    BuildGrid train(traj, grid_spacing); // Generate new grid
+
+    traj = read_traj("Left Only.txt");
+    train.trainOnTrajectory(traj); // Update new grid with another trajectory
+
+    traj = read_traj("Left Right.txt");
+    train.trainOnTrajectory(traj); // Update new grid with another trajectory
+
+    traj = read_traj("Left then right.txt");
+    train.trainOnTrajectory(traj); // Update new grid with another trajectory
+
+    traj = read_traj("Random 1.txt");
+    train.trainOnTrajectory(traj); // Update new grid with another trajectory
+
+    traj = read_traj("Random 2.txt");
+    train.trainOnTrajectory(traj); // Update new grid with another trajectory
+
+    traj = read_traj("Random 3.txt");
+    train.trainOnTrajectory(traj); // Update new grid with another trajectory
+
+    traj = read_traj("Right Only.txt");
+    train.trainOnTrajectory(traj); // Update new grid with another trajectory
+
+    traj = read_traj("zOptimal path fine.txt");
+    train.trainOnTrajectory(traj); // Update new grid with another trajectory
     
-    float grid_spacing = 10;
-    BuildGrid train(traj, grid_spacing);
-    cout << "traj 1 done" << endl;
-    train.trainOnTrajectory(traj1);
-    cout << "traj 2 done" << endl;
+    // Obtain pointer to trained model
     BuildGrid::GridInfo* model = train.getModel();
+    
+    // Save model to ouput directory
+    save_model(model, "model.txt");
 
-    //cout << model->shift[0] << " " << model->shift[1] << endl;
-    save_model(model);
+    // Alternatively, a trained model can be read in from output directory
+    BuildGrid::GridInfo* saved_model = read_model("model.txt");
+    
+    // Obtain the start point from training trajectory last trained on
+    vector<float> start = saved_model->last_start_pt;
 
-    vector<float> start = {640, -320}; // For example.txt
-    //vector<float> start = {-10, -10.}; // For 3point.txt
-    FindPath estimate(model, start);
+    // Generate estimated path based on trained model
+    FindPath estimate(saved_model, start);
 
+    // Obtain path estimate
     vector<vector<float>> calculated_path = estimate.get_path();
 
-    // for (int i = 0; i < calculated_path.size(); i++){
-    //     cout << "First path x: " << calculated_path[i][0] << " y: " << calculated_path[i][1] << endl;
-    // }
+    // Save estimated path from start point
+    write_traj(calculated_path, "estimated_path_from_start.txt");
 
-    BuildGrid::GridInfo* saved_model = read_model();
-    //cout << model->shift[0] << " " << model->shift[1];
-    start = {640, -320};
-    FindPath new_estimate(saved_model, start);
-
+    // Estimate a path from dead end
+    start = {1490, 731}; // Start from a dead end
+    estimate.find_path(start);
     calculated_path = estimate.get_path();
+    
+    // Save estimated path from new start point
+    write_traj(calculated_path, "estimated_path_from_dead_end.txt");
+    
 
-    for (int i = 0; i < calculated_path.size(); i++){
-        cout << "Second path x: " << calculated_path[i][0] << " y: " << calculated_path[i][1] << endl;
-    }
+    // Estimate a path from intersection
+    start = {-967, 402}; // Start from an intersection
+    estimate.find_path(start);
+    calculated_path = estimate.get_path();
+    
+    // Save estimated path from new start point
+    write_traj(calculated_path, "estimated_path_from_intersection.txt");
 
 
     return 0;
