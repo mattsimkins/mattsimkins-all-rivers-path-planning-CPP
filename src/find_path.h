@@ -10,7 +10,11 @@ using namespace std;
 class FindPath {
 public:
     FindPath(BuildGrid::GridInfo* trained_model, vector<float>& start_point);
+    
     vector<vector<float>> get_path();
+    
+    void find_path(vector<float>& start_point);
+    
     ~FindPath();
 
 private:
