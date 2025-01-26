@@ -1,8 +1,11 @@
 #ifndef BUILD_GRID
 #define BUILD_GRID
 #include <vector>
+#include <cmath>
 
 using namespace std;
+
+const float Y_TRI = sqrt(3)/2; // Height of an equilateral triangle
 
 /*
 This class estimates trajectories from a grid. Importantly, it does not just
