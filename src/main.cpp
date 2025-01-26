@@ -1,7 +1,5 @@
 #include <iostream>
-#include <memory>
 #include <vector>
-#include <cmath>
 #include "build_grid.h"
 #include "find_path.h"
 #include "file_handling.h"
@@ -12,35 +10,35 @@ using namespace std;
 
 int main() {
     
-    float grid_spacing = 80; // May involve tuning
-    vector<vector<float>> traj; // For training trajectory argument
+    float grid_spacing = 85; // May involve tuning
+    vector<vector<float>> traj; // Training trajectory
 
-    traj = read_traj("Explore entire maze.txt"); // First trajectory to train on
+    traj = read_traj("Explore entire maze.txt"); // Read-in training trajectory
     BuildGrid train(traj, grid_spacing); // Generate new grid
 
     traj = read_traj("Left Only.txt");
     train.trainOnTrajectory(traj); // Update new grid with another trajectory
 
     traj = read_traj("Left Right.txt");
-    train.trainOnTrajectory(traj); // Update new grid with another trajectory
+    train.trainOnTrajectory(traj); // Update ...
 
     traj = read_traj("Left then right.txt");
-    train.trainOnTrajectory(traj); // Update new grid with another trajectory
-
-    traj = read_traj("Random 1.txt");
-    train.trainOnTrajectory(traj); // Update new grid with another trajectory
+    train.trainOnTrajectory(traj);
 
     traj = read_traj("Random 2.txt");
-    train.trainOnTrajectory(traj); // Update new grid with another trajectory
+    train.trainOnTrajectory(traj);
 
     traj = read_traj("Random 3.txt");
-    train.trainOnTrajectory(traj); // Update new grid with another trajectory
+    train.trainOnTrajectory(traj);
 
     traj = read_traj("Right Only.txt");
-    train.trainOnTrajectory(traj); // Update new grid with another trajectory
+    train.trainOnTrajectory(traj);
+
+    traj = read_traj("Random 1.txt");
+    train.trainOnTrajectory(traj);
 
     traj = read_traj("zOptimal path fine.txt");
-    train.trainOnTrajectory(traj); // Update new grid with another trajectory
+    train.trainOnTrajectory(traj);
     
     // Obtain pointer to trained model
     BuildGrid::GridInfo* model = train.getModel();
@@ -57,7 +55,7 @@ int main() {
     // Generate estimated path based on trained model
     FindPath estimate(saved_model, start);
 
-    // Obtain path estimate
+    // Obtain path estimate to maze end
     vector<vector<float>> calculated_path = estimate.get_path();
 
     // Save estimated path from start point
