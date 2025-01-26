@@ -171,12 +171,12 @@ void FindPath::calculate_path(){
 void FindPath::update_empty_node(const vector<float>& vec,
                                  const vector<int>& index) {
 
-    if ((this->model->grid[index[0]][index[1]][0] != 0) &&
-        (this->model->grid[index[0]][index[1]][1] != 0)) {
+    if ((model->grid[index[0]][index[1]][0] != 0) &&
+        (model->grid[index[0]][index[1]][1] != 0)) {
         cerr << "Trying to overwrite non-zero grid element." << endl;
     }
-    this->model->grid[index[0]][index[1]][0] = vec[0];
-    this->model->grid[index[0]][index[1]][1] = vec[1];
+    model->grid[index[0]][index[1]][0] = vec[0];
+    model->grid[index[0]][index[1]][1] = vec[1];
 }
 
 vector<float> FindPath::two_empty_nodes(
