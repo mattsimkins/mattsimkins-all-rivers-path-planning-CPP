@@ -1,9 +1,8 @@
 #include <iostream>
 #include <vector>
-#include "build_grid.h"
-#include "find_path.h"
-#include "file_handling.h"
-#include "path_functions.h" //included for testing only
+#include "../include/build_grid.h"
+#include "../include/find_path.h"
+#include "../include/file_handling.h"
 
 using namespace std;
 
