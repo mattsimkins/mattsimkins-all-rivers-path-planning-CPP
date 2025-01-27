@@ -1,10 +1,7 @@
 #include <iostream>
-//#include <cmath> 
 #include <limits>
-//#include <cmath>
-#include "build_grid.h"
-//#include "path_functions.h"
-#include "find_path.h"
+#include "../include/build_grid.h"
+#include "../include/find_path.h"
 
 using namespace std;
 
@@ -624,21 +621,25 @@ bool BuildGrid::checkExtents(vector<float> coord, int x_extent,
 
     // Coordinates on the coordinate frame axes are stops calculation
     if (trident[0][0] <= 0) {
-        cout << "Location left of S-Space frame extents." << endl;
+        cerr << "Warning: Location encountered left of S-Space frame extents."
+             << endl;
         exceeded = true;
 
     } else if ((trident[2][1] < 0) ||
                (trident[0][1] < 0)) {
-        cout << "Location beneath S-Space frame extents." << endl;
+        cerr << "Warning: Location encountered beneath S-Space frame extents."
+             << endl;
         exceeded = true;
 
     } else if (trident[1][0] + 1 >= x_extent) {
-        cout << "Location right of S-Space frame extents." << endl;
+        cerr << "Warning: Location encountered right of S-Space frame extents."
+             << endl;
         exceeded = true;
 
     } else if ((trident[0][1] + 1 > y_extent) ||   
                (trident[2][1] + 1 > y_extent)) {
-        cout << "Location above of S-Space frame extents." << endl;
+        cerr << "Warning: Location encountered above of S-Space frame extents."
+             << endl;
         exceeded = true;
     }
     return exceeded;
