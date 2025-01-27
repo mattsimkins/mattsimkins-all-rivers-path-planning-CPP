@@ -1,12 +1,13 @@
 #include <iostream>
 #include "find_path.h"
-#include "build_grid.h"
-#include "path_functions.h"
+//#include "build_grid.h"
+//#include "path_functions.h"
 
 using namespace std;
 
 // Constructor
-FindPath::FindPath(BuildGrid::GridInfo* trained_model, vector<float>& start_point)
+FindPath::FindPath(BuildGrid::GridInfo* trained_model,
+                   vector<float>& start_point)
     : model(trained_model), start_c(start_point) {
     calculate_path();
 }
@@ -49,11 +50,11 @@ void FindPath::calculate_path(){
             loc = calc_traj[(calc_traj.size() - 1)];
 
             // Check that nodes in the triad exceed grid space limits
-            stop_calc = checkExtents(loc, model->grid.size(),
+            stop_calc = bg.checkExtents(loc, model->grid.size(),
                                        model->grid[0].size(), model->d);
             
             // Gather indices neighboring nodes
-            vector<vector<int>> indices = find_trident(loc, model->d);
+            vector<vector<int>> indices = bg.find_trident(loc, model->d);
 
             // Check for negative indices
             for (int i = 0; i < indices.size(); i++){
@@ -90,15 +91,15 @@ void FindPath::calculate_path(){
             bool center_visited = false;
 
             // Determine which nodes were previously visited
-            if (norm(vec_left, {0, 0}) != 0) { 
+            if (bg.norm(vec_left, {0, 0}) != 0) { 
                 left_visited = true;
             }
             
-            if (norm(vec_right, {0, 0}) != 0) { 
+            if (bg.norm(vec_right, {0, 0}) != 0) { 
                 right_visited = true;
             } 
             
-            if (norm(vec_center, {0 ,0}) != 0) {
+            if (bg.norm(vec_center, {0 ,0}) != 0) {
                 center_visited = true;
             }
             
@@ -133,13 +134,13 @@ void FindPath::calculate_path(){
                                           visited_nodes,
                                           indices);
                 
-            // case 4 - All 3 nodes are non-zero (best case and most typical)        
+            // case 4 - All 3 nodes are non-zero (best case and most typical)      
             } else {
-                next_loc = no_empty_node(loc, triad_vecs, indices);
+                    next_loc = no_empty_node(loc, triad_vecs, indices);
             }
 
             // Update running path length ensures path doesn't run on forever
-            float new_length = norm(next_loc, loc);
+            float new_length = bg.norm(next_loc, loc);
             running_length = running_length + new_length;
             
             // Check if done
@@ -188,20 +189,20 @@ vector<float> FindPath::two_empty_nodes(
     vector<float> next_loc; // Next location to add to trajectory
     
     // Calculate location of nodes
-    vector<float> loc_left = coord_from_ind(indices[0], model->d);
-    vector<float> loc_right = coord_from_ind(indices[1], model->d);
-    vector<float> loc_center = coord_from_ind(indices[2], model->d);
+    vector<float> loc_left = bg.coord_from_ind(indices[0], model->d);
+    vector<float> loc_right = bg.coord_from_ind(indices[1], model->d);
+    vector<float> loc_center = bg.coord_from_ind(indices[2], model->d);
     
     // Right and center nodes were empty, use left node to update
     if (visited_nodes[0] == true &&
         visited_nodes[1] == false &&
         visited_nodes[2] == false) {
 
-        vector<float> loc_left_points2 = add_vectors(loc_left,
+        vector<float> loc_left_points2 = bg.add_vectors(loc_left,
                                                      triad_vecs[0]);
-        vector<float> vec_right = subtract_vectors(loc_left_points2,
+        vector<float> vec_right = bg.subtract_vectors(loc_left_points2,
                                                    loc_right);
-        vector<float> vec_center = subtract_vectors(loc_left_points2,
+        vector<float> vec_center = bg.subtract_vectors(loc_left_points2,
                                                     loc_center);
         
         // Populate any empty nodes
@@ -213,11 +214,11 @@ vector<float> FindPath::two_empty_nodes(
                visited_nodes[1] == true &&
                visited_nodes[2] == false) {
                 
-        vector<float> loc_right_points2 = add_vectors(loc_right,
+        vector<float> loc_right_points2 = bg.add_vectors(loc_right,
                                                       triad_vecs[1]);
-        vector<float> vec_left = subtract_vectors(loc_right_points2,
+        vector<float> vec_left = bg.subtract_vectors(loc_right_points2,
                                                   loc_left);
-        vector<float> vec_center = subtract_vectors(loc_right_points2,
+        vector<float> vec_center = bg.subtract_vectors(loc_right_points2,
                                                     loc_center);
         
         // Populate any empty nodes
@@ -229,11 +230,11 @@ vector<float> FindPath::two_empty_nodes(
                visited_nodes[1] == false &&
                visited_nodes[2] == true) {
 
-        vector<float> loc_center_points2 = add_vectors(loc_center,
+        vector<float> loc_center_points2 = bg.add_vectors(loc_center,
                                                        triad_vecs[2]);
-        vector<float> vec_left = subtract_vectors(loc_center_points2,
+        vector<float> vec_left = bg.subtract_vectors(loc_center_points2,
                                                   loc_left);
-        vector<float> vec_right = subtract_vectors(loc_center_points2,
+        vector<float> vec_right = bg.subtract_vectors(loc_center_points2,
                                                    loc_right);
         
         // Populate any empty nodes
@@ -241,7 +242,7 @@ vector<float> FindPath::two_empty_nodes(
         update_empty_node(vec_right, indices[1]);
     }
     // All vectors point to same place, arbitrarily using left
-    next_loc = add_vectors(loc, triad_vecs[0]);
+    next_loc = bg.add_vectors(loc, triad_vecs[0]);
     return next_loc;
 }
 
@@ -252,9 +253,9 @@ vector<float> FindPath::one_empty_node(
                                        const vector<vector<int>>& indices) {
     
     // Find distances to neighboring grid nodes
-    float dist2left = dist2node(loc, indices[0], model->d);
-    float dist2right = dist2node(loc,indices[1], model->d);
-    float dist2center = dist2node(loc, indices[2], model->d);
+    float dist2left = bg.dist2node(loc, indices[0], model->d);
+    float dist2right = bg.dist2node(loc,indices[1], model->d);
+    float dist2center = bg.dist2node(loc, indices[2], model->d);
     
     vector<float> next_loc; // Next location to add to trajectory
 
@@ -269,19 +270,19 @@ vector<float> FindPath::one_empty_node(
         float weight_center = dist2center/den;
         
         // Weight the vectors
-        vector<float> vec_right_weighted = scalar_multiply(triad_vecs[1],
+        vector<float> vec_right_weighted = bg.scalar_multiply(triad_vecs[1],
                                                            weight_right);
-        vector<float> vec_center_weighted = scalar_multiply(triad_vecs[2],
+        vector<float> vec_center_weighted = bg.scalar_multiply(triad_vecs[2],
                                                             weight_center);
         
         // Calculate sum of weighted vectors
-        vector<float> vec_r_plus_c = add_vectors(vec_right_weighted,
+        vector<float> vec_r_plus_c = bg.add_vectors(vec_right_weighted,
                                                  vec_center_weighted);
-        next_loc = add_vectors(loc, vec_r_plus_c);
+        next_loc = bg.add_vectors(loc, vec_r_plus_c);
         
         // Populate empty node
-        vector<float> loc_left = coord_from_ind(indices[0], model->d);
-        vector<float> vec_left = subtract_vectors(next_loc, loc_left);
+        vector<float> loc_left = bg.coord_from_ind(indices[0], model->d);
+        vector<float> vec_left = bg.subtract_vectors(next_loc, loc_left);
         update_empty_node(vec_left, indices[0]);
     
     // Right node empty, use center and left nodes
@@ -295,19 +296,19 @@ vector<float> FindPath::one_empty_node(
         float weight_center = dist2center/den;
         
         // Weight the vectors
-        vector<float> vec_left_weighted = scalar_multiply(triad_vecs[0],
+        vector<float> vec_left_weighted = bg.scalar_multiply(triad_vecs[0],
                                                           weight_left);
-        vector<float> vec_center_weighted = scalar_multiply(triad_vecs[2],
+        vector<float> vec_center_weighted = bg.scalar_multiply(triad_vecs[2],
                                                             weight_center);
         
         // Calculate sum of weighted vectors
-        vector<float> vec_l_plus_c = add_vectors(vec_left_weighted,
+        vector<float> vec_l_plus_c = bg.add_vectors(vec_left_weighted,
                                                  vec_center_weighted);
-        next_loc = add_vectors(loc, vec_l_plus_c);
+        next_loc = bg.add_vectors(loc, vec_l_plus_c);
         
         // Populate empty node
-        vector<float> loc_right = coord_from_ind(indices[1], model->d);
-        vector<float> vec_right = subtract_vectors(next_loc, loc_right);
+        vector<float> loc_right = bg.coord_from_ind(indices[1], model->d);
+        vector<float> vec_right = bg.subtract_vectors(next_loc, loc_right);
         update_empty_node(vec_right, indices[1]);
 
     // Center node empty, use left and right nodes
@@ -319,19 +320,19 @@ vector<float> FindPath::one_empty_node(
         float weight_right = dist2right/den;
         
         // Weight the vectors to left and right nodes
-        vector<float> vec_left_weighted = scalar_multiply(triad_vecs[0],
+        vector<float> vec_left_weighted = bg.scalar_multiply(triad_vecs[0],
                                                           weight_left);
-        vector<float> vec_right_weighted = scalar_multiply(triad_vecs[1],
+        vector<float> vec_right_weighted = bg.scalar_multiply(triad_vecs[1],
                                                            weight_right);
         
         // Calculate sum of weighted vectors
-        vector<float> vec_l_plus_r = add_vectors(vec_left_weighted,
+        vector<float> vec_l_plus_r = bg.add_vectors(vec_left_weighted,
                                                  vec_right_weighted);
-        next_loc = add_vectors(loc, vec_l_plus_r);
+        next_loc = bg.add_vectors(loc, vec_l_plus_r);
         
         // Populate empty node
-        vector<float> loc_center = coord_from_ind(indices[2], model->d);
-        vector<float> vec_center = subtract_vectors(next_loc, loc_center);
+        vector<float> loc_center = bg.coord_from_ind(indices[2], model->d);
+        vector<float> vec_center = bg.subtract_vectors(next_loc, loc_center);
         update_empty_node(vec_center, indices[2]);
     }
     return next_loc;
@@ -345,9 +346,9 @@ vector<float> FindPath::no_empty_node(
     vector<float> next_loc; // Next location to add to trajectory
     
     // Dtermine distances to neighboring grid nodes
-    float dist2left = dist2node(loc, indices[0], model->d);
-    float dist2right = dist2node(loc, indices[1], model->d);
-    float dist2center = dist2node(loc, indices[2], model->d);
+    float dist2left = bg.dist2node(loc, indices[0], model->d);
+    float dist2right = bg.dist2node(loc, indices[1], model->d);
+    float dist2center = bg.dist2node(loc, indices[2], model->d);
     
     // Determine weights based on distances to nodes
     float den = dist2left + dist2center + dist2right;
@@ -356,19 +357,19 @@ vector<float> FindPath::no_empty_node(
     float weight_center = (dist2left + dist2right - dist2center)/den;
     
     // Weight vectors to neighboring nodes
-    vector<float> vec_left_weighted = scalar_multiply(triad_vecs[0],
+    vector<float> vec_left_weighted = bg.scalar_multiply(triad_vecs[0],
                                                       weight_left);
-    vector<float> vec_right_weighted = scalar_multiply(triad_vecs[1],
+    vector<float> vec_right_weighted = bg.scalar_multiply(triad_vecs[1],
                                                        weight_right);
-    vector<float> vec_center_weighted = scalar_multiply(triad_vecs[2],
+    vector<float> vec_center_weighted = bg.scalar_multiply(triad_vecs[2],
                                                         weight_center);
     
     // Sum weighted vectors
-    vector<float> vec_l_plus_r = add_vectors(vec_left_weighted,
+    vector<float> vec_l_plus_r = bg.add_vectors(vec_left_weighted,
                                              vec_right_weighted);
-    vector<float> vec_sum = add_vectors(vec_l_plus_r, vec_center_weighted);
+    vector<float> vec_sum = bg.add_vectors(vec_l_plus_r, vec_center_weighted);
     
     // Add change in vector to current location
-    next_loc = add_vectors(loc, vec_sum);
+    next_loc = bg.add_vectors(loc, vec_sum);
     return next_loc;   
 }
