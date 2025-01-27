@@ -6,6 +6,7 @@
 using namespace std;
 
 const float Y_TRI = sqrt(3)/2; // Height of an equilateral triangle
+const float ANGLE_THRESHOLD = 40*M_PI/180; // Maximum angle difference between new and old vector
 
 /*
 This class estimates trajectories from a grid. Importantly, it does not just
@@ -17,8 +18,8 @@ BuildGrid and FindPath classes because FindPath has some elements of training.
 class BuildGrid {
 public:
 
-    // Constructor to develop for trained grid and trajectory as aguments
-    BuildGrid(vector<vector<float>>& traj_c);
+    // Zero argument constructor for accessing public functions
+    BuildGrid();
     
     // Constructor for new grid
     BuildGrid(vector<vector<float>>& traj_c, float& d);
@@ -38,8 +39,53 @@ public:
         vector<vector<vector<float>>> grid; // 3D matrix to store grid values
     };
 
+
     GridInfo* getModel(); // Member function to return model pointer
     vector<float> getStartPoint(); // Retains a valid start point
+
+    //Adds two vectors element-wise
+    vector<float> add_vectors(vector<float> v1, vector<float> v2);
+
+    // Subtracts two vectors element-wise
+    vector<float> subtract_vectors(vector<float> v1, vector<float> v2);
+
+    // Calculates the Euclidean distance between two vectors
+    float norm(vector<float> v1, vector<float> v2);
+
+    // Calculate scalar multiply of vector
+    vector<float> scalar_multiply(vector<float> v, float scalar);
+
+    // Calculate distance between a location, and the coordinate of a node given by its indices
+    float dist2node(vector<float> loc, vector<int> indices, float d);
+
+    // Calculates the coordinates of a node given its index
+    vector<float> index2coord(vector<int> index, float d);
+
+    // Finds the three closest nodes to the given coordinate
+    vector<vector<int>> find_trident(vector<float> coord, float d);
+
+    // Determines if a coordinate is outside the grid
+    bool outsideExtents(vector<float> coord, int x_extent,
+                        int y_extent, float d);
+
+    // Throws error if a coordinate is outside the grid
+    bool checkExtents(vector<float> coord, int x_extent,
+                        int y_extent, float d);
+
+    // Finds the index of the closest node to the given coordinate
+    vector<int> find_closest_index(vector<float> coord, float d);
+
+    // Find S-Space coordinates given index
+    vector<float> coord_from_ind(vector<int> ind, float d);
+
+    // Trajectory metrics are for later use when estimating a path from grid
+    struct metrics {
+        float path_length;
+        float shortest_segment;
+        float coord_count;
+    };
+    metrics trajectory_metrics(vector<vector<float>> traj);
+
 
     ~BuildGrid();
 
