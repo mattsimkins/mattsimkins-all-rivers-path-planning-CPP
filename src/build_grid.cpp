@@ -1,13 +1,14 @@
 #include <iostream>
-#include <cmath> 
+//#include <cmath> 
 #include <limits>
-#include <cmath>
+//#include <cmath>
 #include "build_grid.h"
-#include "path_functions.h"
+//#include "path_functions.h"
 #include "find_path.h"
 
 using namespace std;
 
+BuildGrid::BuildGrid() {}
 
 BuildGrid::BuildGrid(vector<vector<float>>& trajectory, float& node_spacing)
                 : traj_c(trajectory) {
@@ -331,7 +332,7 @@ void BuildGrid::updateNode(const vector<float>& vec,
     }
 }
 
-vector<int> find_closest_index(const vector<float>& coord, const float& d){
+vector<int> BuildGrid::find_closest_index(vector<float> coord, float d){
     int j_closest = round(coord[1] / (d * Y_TRI));
     int i_closest = round(coord[0] / d - 0.5);
     if (j_closest % 2 == 0) {
@@ -340,7 +341,7 @@ vector<int> find_closest_index(const vector<float>& coord, const float& d){
     return {i_closest, j_closest};
 }
 
-vector<float> index2coord(const vector<int>& index, const float& d){
+vector<float> BuildGrid::index2coord(vector<int> index, float d){
     vector<float> coord = {(float)index[0] * d, (float)index[1] * d * Y_TRI};
     if (index[1] % 2 != 0) {
         coord[0] += d / 2;
@@ -348,7 +349,7 @@ vector<float> index2coord(const vector<int>& index, const float& d){
     return coord;
 }
 
-vector<float> coord_from_ind(const vector<int>& ind, const float& d){
+vector<float> BuildGrid::coord_from_ind(vector<int> ind, float d){
     float x;
     if (ind[1] % 2 == 0) {
             x = ind[0]*d;
@@ -362,7 +363,7 @@ vector<float> coord_from_ind(const vector<int>& ind, const float& d){
 
 
 // Returns 3 rows of indices, to the left, right, and center of coordinate
-vector<vector<int>> find_trident(const vector<float>& coord, const float& d) {
+vector<vector<int>> BuildGrid::find_trident(vector<float> coord, float d) {
 
     vector<int> ci = find_closest_index(coord, d); // Closest index (ci)
 
@@ -504,4 +505,141 @@ vector<vector<int>> find_trident(const vector<float>& coord, const float& d) {
                                 {i_center, j_center}
                                 };
     return triad;
+}
+
+// Adds two vectors element-wise
+vector<float> BuildGrid::add_vectors(vector<float> v1, vector<float> v2) {
+    if (v1.size() != v2.size()) {
+        throw runtime_error("Vectors must be the same size.");
+    }
+
+    vector<float> result(v1.size());
+    for (size_t i = 0; i < v1.size(); ++i) {
+        result[i] = v1[i] + v2[i];
+    }
+
+    return result;
+}
+
+
+// Subtracts two vectors element-wise
+vector<float> BuildGrid::subtract_vectors(vector<float> v1,
+                               vector<float> v2) {
+    if (v1.size() != v2.size()) {
+        throw runtime_error("Vectors must be the same size.");
+    }
+
+    vector<float> result(v1.size());
+    for (size_t i = 0; i < v1.size(); ++i) {
+        result[i] = v1[i] - v2[i];
+    }
+
+    return result;
+}
+
+// Calculates the Euclidean distance between two vectors
+float BuildGrid::norm(vector<float> v1, vector<float> v2) {
+    float sum = 0;
+    for (int i = 0; i < v1.size(); i++) {
+        sum += (v1[i] - v2[i]) * (v1[i] - v2[i]);
+    }
+    return sqrt(sum);
+}
+
+vector<float> BuildGrid::scalar_multiply(vector<float> v, float scalar){
+    vector<float> result(v.size());
+    for (size_t i = 0; i < v.size(); ++i) {
+        result[i] = v[i] * scalar;
+    }
+    return result;
+}
+
+
+
+float BuildGrid::dist2node(vector<float> loc, vector<int> indices, float d){
+    vector<float> node_coord = index2coord(indices, d);
+    return norm(loc, node_coord);
+}
+
+BuildGrid::metrics BuildGrid::trajectory_metrics(vector<vector<float>> traj){
+    metrics metrics;
+    float length = 0;
+    for (int i = 0; i < traj.size() - 1; i++) {
+        length += norm(traj[i], traj[i + 1]);
+    }
+
+    metrics.path_length = length;
+    float shortest_segement = std::numeric_limits<float>::max();
+
+    for (int i = 0; i < traj.size() - 1; i++) {
+        float segment = norm(traj[i], traj[i + 1]);
+
+        if (segment < shortest_segement) {
+            shortest_segement = segment;
+        }
+    }
+
+    metrics.shortest_segment = shortest_segement;
+    int coord_count = traj.size();
+    metrics.coord_count = coord_count;
+
+    return metrics;
+}
+
+
+// Determines if a coordinate is outside the grid
+bool BuildGrid::outsideExtents(vector<float> coord, int x_extent,
+                    int y_extent, float d){
+
+    bool exceeded = false;
+
+    // The triangle of 3 nearest nodes is defined here as a "trident"
+    vector<vector<int>> trident = find_trident(coord, d);
+
+    // Coordinates on the coordinate frame axes are prohibited
+    // Left is trident[0], right is trident[1], center is trident[2]
+    if (coord[0] == 0 or coord[1] == 0){
+        exceeded = true;
+    } else if ((trident[0][0] < 0) || 
+               (trident[0][1] + 1 > y_extent) || 
+               (trident[0][1] < 0) || 
+               (trident[1][0] + 1 > x_extent) ||
+               (trident[2][1] < 0) || 
+               (trident[2][1] + 1 > y_extent)) {
+        exceeded = true;
+    }
+
+    return exceeded;
+
+}
+
+// Determines if a coordinate is outside the grid
+bool BuildGrid::checkExtents(vector<float> coord, int x_extent,
+                    int y_extent, float d){
+
+    bool exceeded = false;
+
+    // The triangle of 3 nearest nodes is defined here as a "trident"!!might pass indices to preven recalculation
+    vector<vector<int>> trident = find_trident(coord, d);
+
+    // Coordinates on the coordinate frame axes are stops calculation
+    if (trident[0][0] <= 0) {
+        cout << "Location left of S-Space frame extents." << endl;
+        exceeded = true;
+
+    } else if ((trident[2][1] < 0) ||
+               (trident[0][1] < 0)) {
+        cout << "Location beneath S-Space frame extents." << endl;
+        exceeded = true;
+
+    } else if (trident[1][0] + 1 >= x_extent) {
+        cout << "Location right of S-Space frame extents." << endl;
+        exceeded = true;
+
+    } else if ((trident[0][1] + 1 > y_extent) ||   
+               (trident[2][1] + 1 > y_extent)) {
+        cout << "Location above of S-Space frame extents." << endl;
+        exceeded = true;
+    }
+    return exceeded;
 }
