@@ -1,7 +1,5 @@
 #include <iostream>
-#include "find_path.h"
-//#include "build_grid.h"
-//#include "path_functions.h"
+#include "../include/find_path.h"
 
 using namespace std;
 
