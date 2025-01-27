@@ -3,9 +3,14 @@
 
 #include <vector>
 #include "build_grid.h"
-#include "file_handling.h"
+//#include "file_handling.h"
 
 using namespace std;
+
+const float SHORTEST_SEGMENT_MARGIN = 50; // Percentage of shortest trajectory segment to add to gridrid
+const float POINT_COUNT_MARGIN = 50; // Percentage of trajectory point count to add to grid
+// const float ANGLE_THRESHOLD = 40*M_PI/180; // Maximum angle difference between new and old vector
+
 
 class FindPath {
 public:
@@ -18,6 +23,8 @@ public:
     ~FindPath();
 
 private:
+    BuildGrid bg;
+
     void calculate_path(); // Calculates path based on trained model
 
     // For calculating path when training includes only one node
