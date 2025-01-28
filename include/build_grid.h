@@ -1,117 +1,254 @@
-#ifndef BUILD_GRID
-#define BUILD_GRID
-#include <vector>
-#include <cmath>
+/**
+ * @file build_grid.h
+ * @brief Header file for the BuildGrid class which estimates and updates trajectories on a grid.
+ */
 
-using namespace std;
-
-const float Y_TRI = sqrt(3)/2; // Height of an equilateral triangle
-const float ANGLE_THRESHOLD = 40*M_PI/180; // Maximum angle difference between new and old vector
-
-/*
-This class estimates trajectories from a grid. Importantly, it does not just
-use the grid to estimate a path, it also updates the grid with new, calculated
-trajectories. Therefore, there's arguably a weak dependency between the 
-BuildGrid and FindPath classes because FindPath has some elements of training.
-*/
-
+/**
+ * @class BuildGrid
+ * @brief Creates and trains a model based on training trajectories.
+ * 
+ * Trains a model (grid) by iteratively reading in 2D trajectories. The model
+ * includes various pieces of meta-data, as well as a 3D grid. The nodes of
+ * this grid allow for path estimation, see find_path.h.
+ */
 class BuildGrid {
 public:
-
-    // Zero argument constructor for accessing public functions
+    /**
+     * @brief Zero argument constructor for accessing public functions.
+     */
     BuildGrid();
     
-    // Constructor for new grid
+    /**
+     * @brief Constructor for initializing a new grid.
+     * 
+     * This 
+     * @param traj_c Training trajectories in C-space.
+     * @param d Node spacing.
+     */
     BuildGrid(vector<vector<float>>& traj_c, float& d);
     
-    // Training on existing grid
+    /**
+     * @brief Trains the grid on an existing trajectory.
+     * 
+     * @param traj Training trajectory.
+     */
     void trainOnTrajectory(vector<vector<float>>& traj);
     
-    // Captures essential training model information
+    /**
+     * @brief Structure to capture essential training model information.
+     */
     struct GridInfo {
-        float d; // Node spacing
-        float average_path_length; // Average length of training paths
-        int grid_update_count; // Number of times grid has been updated
-        int max_coord_count; // Max coordinate count in training trajectories
-        float shortest_segment; // Min distance between trajectory coordinates
-        vector<float> last_start_pt; // Retains a viable start point for model
-        vector<float> shift; // Shifts C-Space to S-Space
-        vector<vector<vector<float>>> grid; // 3D matrix to store grid values
+        float d; ///< Node spacing
+        float average_path_length; ///< Average length of training paths
+        int grid_update_count; ///< Number of times grid has been updated
+        int max_coord_count; ///< Max coordinate count in training trajectories
+        float shortest_segment; ///< Min distance between trajectory coordinates
+        vector<float> last_start_pt; ///< Retains a viable start point for model
+        vector<float> shift; ///< Shifts C-Space to S-Space
+        vector<vector<vector<float>>> grid; ///< 3D matrix to store grid values
     };
 
+    /**
+     * @brief Returns a pointer to the model.
+     * 
+     * @return Pointer to GridInfo structure.
+     */
+    GridInfo* getModel();
 
-    GridInfo* getModel(); // Member function to return model pointer
-    vector<float> getStartPoint(); // Retains a valid start point
+    /**
+     * @brief Retains a valid start point.
+     * 
+     * @return Vector containing the start point.
+     */
+    vector<float> getStartPoint();
 
-    //Adds two vectors element-wise
+    /**
+     * @brief Adds two vectors element-wise.
+     * 
+     * @param v1 First vector.
+     * @param v2 Second vector.
+     * @return Resultant vector after addition.
+     */
     vector<float> add_vectors(vector<float> v1, vector<float> v2);
 
-    // Subtracts two vectors element-wise
+    /**
+     * @brief Subtracts two vectors element-wise.
+     * 
+     * @param v1 First vector.
+     * @param v2 Second vector.
+     * @return Resultant vector after subtraction.
+     */
     vector<float> subtract_vectors(vector<float> v1, vector<float> v2);
 
-    // Calculates the Euclidean distance between two vectors
+    /**
+     * @brief Calculates the Euclidean distance between two vectors.
+     * 
+     * @param v1 First vector.
+     * @param v2 Second vector.
+     * @return Euclidean distance.
+     */
     float norm(vector<float> v1, vector<float> v2);
 
-    // Calculate scalar multiply of vector
+    /**
+     * @brief Calculates the scalar multiplication of a vector.
+     * 
+     * @param v Vector to be multiplied.
+     * @param scalar Scalar value.
+     * @return Resultant vector after scalar multiplication.
+     */
     vector<float> scalar_multiply(vector<float> v, float scalar);
 
-    // Calculate distance between a location, and the coordinate of a node given by its indices
+    /**
+     * @brief Calculates the distance between a location and the coordinate of a node given by its indices.
+     * 
+     * @param loc Location vector.
+     * @param indices Indices of the node.
+     * @param d Node spacing.
+     * @return Distance to the node.
+     */
     float dist2node(vector<float> loc, vector<int> indices, float d);
 
-    // Calculates the coordinates of a node given its index
+    /**
+     * @brief Calculates the coordinates of a node given its index.
+     * 
+     * @param index Index of the node.
+     * @param d Node spacing.
+     * @return Coordinates of the node.
+     */
     vector<float> index2coord(vector<int> index, float d);
 
-    // Finds the three closest nodes to the given coordinate
+    /**
+     * @brief Finds the three closest nodes to the given coordinate.
+     * 
+     * @param coord Coordinate vector.
+     * @param d Node spacing.
+     * @return Vector of indices of the three closest nodes.
+     */
     vector<vector<int>> find_trident(vector<float> coord, float d);
 
-    // Determines if a coordinate is outside the grid
-    bool outsideExtents(vector<float> coord, int x_extent,
-                        int y_extent, float d);
+    /**
+     * @brief Determines if a coordinate is outside the grid.
+     * 
+     * @param coord Coordinate vector.
+     * @param x_extent X extent of the grid.
+     * @param y_extent Y extent of the grid.
+     * @param d Node spacing.
+     * @return True if the coordinate is outside the grid, false otherwise.
+     */
+    bool outsideExtents(vector<float> coord, int x_extent, int y_extent, float d);
 
-    // Throws error if a coordinate is outside the grid
-    bool checkExtents(vector<float> coord, int x_extent,
-                        int y_extent, float d);
+    /**
+     * @brief Throws an error if a coordinate is outside the grid.
+     * 
+     * @param coord Coordinate vector.
+     * @param x_extent X extent of the grid.
+     * @param y_extent Y extent of the grid.
+     * @param d Node spacing.
+     * @return True if the coordinate is within the grid, false otherwise.
+     */
+    bool checkExtents(vector<float> coord, int x_extent, int y_extent, float d);
 
-    // Finds the index of the closest node to the given coordinate
+    /**
+     * @brief Finds the index of the closest node to the given coordinate.
+     * 
+     * @param coord Coordinate vector.
+     * @param d Node spacing.
+     * @return Index of the closest node.
+     */
     vector<int> find_closest_index(vector<float> coord, float d);
 
-    // Find S-Space coordinates given index
+    /**
+     * @brief Finds the S-Space coordinates given an index.
+     * 
+     * @param ind Index vector.
+     * @param d Node spacing.
+     * @return S-Space coordinates.
+     */
     vector<float> coord_from_ind(vector<int> ind, float d);
 
-    // Trajectory metrics are for later use when estimating a path from grid
+    /**
+     * @brief Structure to capture trajectory metrics for later use when estimating a path from the grid.
+     */
     struct metrics {
-        float path_length;
-        float shortest_segment;
-        float coord_count;
+        float path_length; ///< Length of the path
+        float shortest_segment; ///< Shortest segment in the path
+        float coord_count; ///< Number of coordinates in the path
     };
+
+    /**
+     * @brief Calculates trajectory metrics.
+     * 
+     * @param traj Trajectory vector.
+     * @return Metrics structure containing path length, shortest segment, and coordinate count.
+     */
     metrics trajectory_metrics(vector<vector<float>> traj);
 
-
+    /**
+     * @brief Destructor for the BuildGrid class.
+     */
     ~BuildGrid();
 
-
 private:
-    void fixDuplicates(); // Removes consecutive duplicate points from trajectory
-    void initializeGrid(); // Initializes the grid for first training trajectory
-    void trainGrid(const vector<vector<float>>& traj); // Trains the grid with the trajectory in c-space
-    void checkExtents_c(); // Resizes grid if a training trajectory exceeds old extents
+    /**
+     * @brief Removes consecutive duplicate points from the trajectory.
+     */
+    void fixDuplicates();
+
+    /**
+     * @brief Initializes the grid for the first training trajectory.
+     */
+    void initializeGrid();
+
+    /**
+     * @brief Trains the grid with the trajectory in C-space.
+     * 
+     * @param traj Training trajectory.
+     */
+    void trainGrid(const vector<vector<float>>& traj);
+
+    /**
+     * @brief Resizes the grid if a training trajectory exceeds old extents.
+     */
+    void checkExtents_c();
+
+    /**
+     * @brief Updates a node with the given vector and indices.
+     * 
+     * @param vec Vector to update the node with.
+     * @param indices Indices of the node.
+     */
     void updateNode(const vector<float>& vec, const vector<int>& indices);
-    GridInfo model;
-    //GridInfo* model_ptr = &model;
-    vector<float> calculateExtents_c(); // Calculates C-Space extents of trajectory
-    vector<vector<vector<float>>> sizeGrid(const int& rows, const int& cols, const int& depth); // Resizes the grid
-    vector<float> cSpaceExtents; // Coordinate frame extents in C-Space
-    int grid_update_count; // Number of times grid has been updated
-    float average_path_length;
-    int max_coord_count;
-    float shortest_segment;
-    vector<float> sSpaceExtents;
-    float d;
-    float gridSizeX;
-    float gridSizeY;
-    float variable;
-    vector<vector<float>> traj_c;
-    vector<vector<float>> traj_s;
+
+    /**
+     * @brief Calculates the C-Space extents of the trajectory.
+     * 
+     * @return Vector containing the C-Space extents.
+     */
+    vector<float> calculateExtents_c();
+
+    /**
+     * @brief Resizes the grid.
+     * 
+     * @param rows Number of rows.
+     * @param cols Number of columns.
+     * @param depth Depth of the grid.
+     * @return Resized 3D grid.
+     */
+    vector<vector<vector<float>>> sizeGrid(const int& rows, const int& cols, const int& depth);
+
+    GridInfo model; ///< Model information
+    vector<float> cSpaceExtents; ///< Coordinate frame extents in C-Space
+    int grid_update_count; ///< Number of times grid has been updated
+    float average_path_length; ///< Average length of training paths
+    int max_coord_count; ///< Max coordinate count in training trajectories
+    float shortest_segment; ///< Min distance between trajectory coordinates
+    vector<float> sSpaceExtents; ///< Coordinate frame extents in S-Space
+    float d; ///< Node spacing
+    float gridSizeX; ///< Grid size in X direction
+    float gridSizeY; ///< Grid size in Y direction
+    float variable; ///< Variable for internal use
+    vector<vector<float>> traj_c; ///< Training trajectories in C-space
+    vector<vector<float>> traj_s; ///< Training trajectories in S-space
 };
 
 #endif
