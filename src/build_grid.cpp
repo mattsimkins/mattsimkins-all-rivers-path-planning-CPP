@@ -7,6 +7,10 @@ using namespace std;
 
 BuildGrid::BuildGrid() {}
 
+BuildGrid::BuildGrid(GridInfo* trained_model) {
+    model = *trained_model;
+}
+
 BuildGrid::BuildGrid(vector<vector<float>>& trajectory, float& node_spacing)
                 : traj_c(trajectory) {
     model.d = node_spacing;
@@ -28,7 +32,6 @@ BuildGrid::GridInfo* BuildGrid::getModel() {
     return &model;
 }
 
-
 vector<float> BuildGrid::getStartPoint() {
     return model.last_start_pt;
 }
@@ -41,8 +44,7 @@ void BuildGrid::trainOnTrajectory(vector<vector<float>>& traj){
     FindPath estimate(getModel(), model.last_start_pt);
     //trainGrid(traj);
     estimate.find_path(model.last_start_pt);
-    trainGrid(traj);
-    
+    trainGrid(traj);    
 }
 
 void BuildGrid::fixDuplicates(){
@@ -106,7 +108,6 @@ void BuildGrid::checkExtents_c(){
 }
 
 vector<float> BuildGrid::calculateExtents_c(){
- 
     // Find x extents
     float minX = numeric_limits<float>::max();
     float maxX = numeric_limits<float>::lowest();
@@ -115,7 +116,6 @@ vector<float> BuildGrid::calculateExtents_c(){
         maxX = max(maxX, row[0]);
     }
 
-    
     // Find y extents
     float minY = numeric_limits<float>::max();
     float maxY = numeric_limits<float>::lowest();
@@ -148,8 +148,8 @@ vector<vector<vector<float>>> BuildGrid::sizeGrid(
 
 // Initialize grid with a trajectory for size, and node spacing
 void BuildGrid::initializeGrid() {
-    gridSizeX = cSpaceExtents[1] - cSpaceExtents[0];
-    gridSizeY = cSpaceExtents[3] - cSpaceExtents[2];
+    float gridSizeX = cSpaceExtents[1] - cSpaceExtents[0];
+    float gridSizeY = cSpaceExtents[3] - cSpaceExtents[2];
     int count_i = ceil(gridSizeX/model.d); //Along x in C-Space
     int count_j = ceil(gridSizeY/(model.d*Y_TRI)); //Along y in C-Space
     model.grid = sizeGrid(count_i, count_j, 2);
@@ -279,7 +279,6 @@ void BuildGrid::trainGrid(const vector<vector<float>>& traj_c) {
     }
 }
 
-
 void BuildGrid::updateNode(const vector<float>& vec,
                            const vector<int>& indices) {
     
@@ -357,7 +356,6 @@ vector<float> BuildGrid::coord_from_ind(vector<int> ind, float d){
     float y = ind[1]*d*Y_TRI;
     return {x, y};
 }
-
 
 // Returns 3 rows of indices, to the left, right, and center of coordinate
 vector<vector<int>> BuildGrid::find_trident(vector<float> coord, float d) {
@@ -518,7 +516,6 @@ vector<float> BuildGrid::add_vectors(vector<float> v1, vector<float> v2) {
     return result;
 }
 
-
 // Subtracts two vectors element-wise
 vector<float> BuildGrid::subtract_vectors(vector<float> v1,
                                vector<float> v2) {
@@ -582,7 +579,6 @@ BuildGrid::metrics BuildGrid::trajectory_metrics(vector<vector<float>> traj){
 
     return metrics;
 }
-
 
 // Determines if a coordinate is outside the grid
 bool BuildGrid::outsideExtents(vector<float> coord, int x_extent,
