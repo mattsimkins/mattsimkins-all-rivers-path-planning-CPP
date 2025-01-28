@@ -16,7 +16,6 @@ FindPath::~FindPath() {}
 // Public function gets path transformed from S-Space to C-Space
 vector<vector<float>> FindPath::get_path(){
     vector<vector<float>> traj_c(calc_traj.size(), vector<float>(2));
-    cout << "calc_traj size is: " << calc_traj.size() << endl;
 
     for (int i = 0; i < calc_traj.size(); i++){
         traj_c[i][0] = calc_traj[i][0] - model->shift[0];
