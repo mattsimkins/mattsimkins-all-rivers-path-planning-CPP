@@ -229,9 +229,9 @@ void BuildGrid::trainGrid(const vector<vector<float>>& traj_c) {
                                                                   loc_center);
             
             // Upate nodes with trajectory
-            updateNode(vec_left2traj_next, trident[0]);
-            updateNode(vec_right2traj_next, trident[1]);
-            updateNode(vec_center2traj_next, trident[2]);
+            update_node(vec_left2traj_next, trident[0]);
+            update_node(vec_right2traj_next, trident[1]);
+            update_node(vec_center2traj_next, trident[2]);
         
         // If next trajectory point is distant update nodes in between
         } else {
@@ -271,15 +271,15 @@ void BuildGrid::trainGrid(const vector<vector<float>>& traj_c) {
                                   subtract_vectors(loc_next, loc_center);
                     
                     // Update model
-                    updateNode(vec_left2traj_next, trident[0]);
-                    updateNode(vec_right2traj_next, trident[1]);
-                    updateNode(vec_center2traj_next, trident[2]);
+                    update_node(vec_left2traj_next, trident[0]);
+                    update_node(vec_right2traj_next, trident[1]);
+                    update_node(vec_center2traj_next, trident[2]);
             }
         }  
     }
 }
 
-void BuildGrid::updateNode(const vector<float>& vec,
+void BuildGrid::update_node(const vector<float>& vec,
                            const vector<int>& indices) {
     
     int i = indices[0];
@@ -357,7 +357,6 @@ vector<float> BuildGrid::coord_from_ind(vector<int> ind, float d){
     return {x, y};
 }
 
-// Returns 3 rows of indices, to the left, right, and center of coordinate
 vector<vector<int>> BuildGrid::find_trident(vector<float> coord, float d) {
 
     vector<int> ci = find_closest_index(coord, d); // Closest index (ci)
@@ -502,7 +501,6 @@ vector<vector<int>> BuildGrid::find_trident(vector<float> coord, float d) {
     return triad;
 }
 
-// Adds two vectors element-wise
 vector<float> BuildGrid::add_vectors(vector<float> v1, vector<float> v2) {
     if (v1.size() != v2.size()) {
         throw runtime_error("Vectors must be the same size.");
@@ -512,11 +510,10 @@ vector<float> BuildGrid::add_vectors(vector<float> v1, vector<float> v2) {
     for (size_t i = 0; i < v1.size(); ++i) {
         result[i] = v1[i] + v2[i];
     }
-
+    
     return result;
 }
 
-// Subtracts two vectors element-wise
 vector<float> BuildGrid::subtract_vectors(vector<float> v1,
                                vector<float> v2) {
     if (v1.size() != v2.size()) {
@@ -531,7 +528,6 @@ vector<float> BuildGrid::subtract_vectors(vector<float> v1,
     return result;
 }
 
-// Calculates the Euclidean distance between two vectors
 float BuildGrid::norm(vector<float> v1, vector<float> v2) {
     float sum = 0;
     for (int i = 0; i < v1.size(); i++) {
@@ -547,8 +543,6 @@ vector<float> BuildGrid::scalar_multiply(vector<float> v, float scalar){
     }
     return result;
 }
-
-
 
 float BuildGrid::dist2node(vector<float> loc, vector<int> indices, float d){
     vector<float> node_coord = index2coord(indices, d);
@@ -580,7 +574,6 @@ BuildGrid::metrics BuildGrid::trajectory_metrics(vector<vector<float>> traj){
     return metrics;
 }
 
-// Determines if a coordinate is outside the grid
 bool BuildGrid::outsideExtents(vector<float> coord, int x_extent,
                     int y_extent, float d){
 
@@ -606,7 +599,6 @@ bool BuildGrid::outsideExtents(vector<float> coord, int x_extent,
 
 }
 
-// Determines if a coordinate is outside the grid
 bool BuildGrid::checkExtents(vector<float> coord, int x_extent,
                     int y_extent, float d){
 
