@@ -5,10 +5,10 @@
 
 using namespace std;
 
-const float Y_TRI = sqrt(3)/2; /// Height of an equilateral triangle
-const float ANGLE_THRESHOLD = 40*M_PI/180; /// Maximum angle difference between new and old vector
-
-
+/// @brief Height of an equilateral triangle
+const float Y_TRI = sqrt(3)/2;
+/// @brief Max angle difference between new and old vector
+const float ANGLE_THRESHOLD = 40*M_PI/180;
 
 /**
  * @class BuildGrid
@@ -333,7 +333,7 @@ private:
      * @param vec Vector to update a node with
      * @param indices Indices of node within grid
      */
-    void updateNode(const vector<float>& vec, const vector<int>& indices);
+    void update_node(const vector<float>& vec, const vector<int>& indices);
 
     /**
      * @brief Calculates C-Space extents of trajectory
@@ -361,10 +361,17 @@ private:
                                            const int& cols,
                                            const int& depth);
     
-    vector<float> cSpaceExtents; /// Coordinate frame extents in C-Space.
-    float d; /// Not using model.d so that public member functions are accessable.
-    vector<vector<float>> traj_c; /// C-space "configuration space" trajectory.
-    vector<vector<float>> traj_s; /// Transformed to s-space trajectory.
+    /// @brief Coordinate frame extents in C-Space.
+    vector<float> cSpaceExtents;
+    
+    /// @brief Not using model.d so that public member functions are accessable.
+    float d;
+    
+    /// @brief C-space "configuration space" trajectory.
+    vector<vector<float>> traj_c;
+    
+    /// @brief Transformed to s-space trajectory.
+    vector<vector<float>> traj_s;
 };
 
 #endif
