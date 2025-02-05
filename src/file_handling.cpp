@@ -5,7 +5,6 @@
 
 using namespace std;
 
-// Requires a directory named "training" be created in working directory
 // Reads in trajectory from text file
 vector<vector<float>> read_traj(string file_name) {
     string path = "../training/" + file_name;
@@ -14,7 +13,7 @@ vector<vector<float>> read_traj(string file_name) {
     if (inputFile.is_open()) {
         std::string line;
 
-        // Read the file line by line
+        // Read the file line by line.
         while (std::getline(inputFile, line)) {            
             stringstream ss(line);
             string word;
@@ -40,7 +39,6 @@ vector<vector<float>> read_traj(string file_name) {
     return traj;
 }
 
-// Requires a directory named "outputs" be created in working directory
 void write_traj(vector<vector<float>>& traj, string file_name){
     string path = "../outputs/" + file_name;
     ofstream outfile(path);
@@ -59,10 +57,9 @@ void write_traj(vector<vector<float>>& traj, string file_name){
     outfile.close();
 }
 
-// Requires a directory named "outputs" be created in working directory
 void save_model(BuildGrid::GridInfo* model_ptr, string file_name){
     
-    // Copy to type Model_R_W and martial vectors for write 
+    // Copy to type Model_R_W and martial vectors for writing.
     Model_R_W model_w;
     model_w.d = model_ptr->d;
     model_w.average_path_length = model_ptr->average_path_length;
@@ -77,7 +74,7 @@ void save_model(BuildGrid::GridInfo* model_ptr, string file_name){
     model_w.size_j = model_ptr->grid[0].size();
     model_w.size_k = model_ptr->grid[0][0].size();
     
-    // String indexing for grid
+    // String indexing for grid.
     string str_val;
     string marshaled_vec;
     for (int i = 0; i < model_w.size_i; ++i){
@@ -99,6 +96,7 @@ void save_model(BuildGrid::GridInfo* model_ptr, string file_name){
         cerr << "Error opening file!" << endl;
     }
 
+    // Ouputs model to a .txt format suitable for storage.
     outfile << model_w.d << " " 
             << model_w.average_path_length << " "
             << model_w.grid_update_count << " "
@@ -115,7 +113,6 @@ void save_model(BuildGrid::GridInfo* model_ptr, string file_name){
     outfile.close();
 }
 
-// Requires a directory named "outputs" be created in working directory
 BuildGrid::GridInfo* read_model(string file_name) {
 
     BuildGrid::GridInfo* model = new BuildGrid::GridInfo;
@@ -157,6 +154,7 @@ BuildGrid::GridInfo* read_model(string file_name) {
         }
     }
 
+    // Initialize model structure that is suitable for use with All Rivers.
     model->d = model_r.d;
     model->average_path_length = model_r.average_path_length;
     model->grid_update_count = model_r.grid_update_count;
